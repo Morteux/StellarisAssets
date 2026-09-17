@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Stellaris Assets browser">
+  <title>Stellaris Assets</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">✦</span>
+      <div>
+        <h1>Stellaris Assets</h1>
+        <p>Static asset explorer</p>
+      </div>
+    </div>
+    <a class="repo-link" href="https://github.com/Morteux/StellarisAssets" target="_blank" rel="noreferrer">GitHub ↗</a>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar" aria-label="Folders">
+      <div class="sidebar-header">
+        <span>Folders</span>
+        <span id="folder-count" class="muted">0</span>
+      </div>
+      <nav id="folders" class="folder-tree"></nav>
+    </aside>
+
+    <section class="content">
+      <div class="toolbar">
+        <div class="search-wrap">
+          <label class="sr-only" for="search">Search assets</label>
+          <input id="search" type="search" placeholder="Search by file or folder…" autocomplete="off">
+          <kbd>/</kbd>
+        </div>
+        <div class="toolbar-right">
+          <span id="result-count" class="result-count">Loading…</span>
+          <select id="sort" aria-label="Sort assets">
+            <option value="name">Name</option>
+            <option value="folder">Folder</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="status" class="status">Loading asset index…</div>
+      <div id="asset-groups" class="asset-groups"></div>
+    </section>
+  </main>
+
+  <div id="lightbox" class="lightbox" hidden>
+    <button id="lightbox-close" class="lightbox-close" type="button" aria-label="Close preview">×</button>
+    <div class="lightbox-inner">
+      <img id="lightbox-image" src="" alt="">
+      <div class="lightbox-caption">
+        <strong id="lightbox-name"></strong>
+        <button id="lightbox-copy" class="button" type="button">Copy URL</button>
+      </div>
+    </div>
+  </div>
+
+  <template id="asset-card-template">
+    <article class="asset-card">
+      <button class="thumb-button" type="button">
+        <img class="thumb" loading="lazy" decoding="async" alt="">
+      </button>
+      <div class="asset-info">
+        <div class="asset-name" title=""></div>
+        <div class="asset-path" title=""></div>
+        <div class="asset-actions">
+          <a class="button open-link" target="_blank" rel="noreferrer">Open</a>
+          <button class="button copy-button" type="button">Copy URL</button>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
