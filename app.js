@@ -1,4 +1,6 @@
-const DATA_URL = './assets.json';
+const REPOSITORY = 'Morteux/StellarisAssets';
+const BRANCH = 'main';
+const API_URL = `https://api.github.com/repos/${REPOSITORY}/git/trees/${BRANCH}?recursive=1`;
 const IMAGE_EXTENSIONS = /\.(png|jpe?g|gif|webp|avif|svg)$/i;
 
 const state = { assets: [], folder: '', query: '', sort: 'name' };
@@ -126,16 +128,19 @@ function renderAssets() {
 
 async function init() {
   try {
-    const response = await fetch(DATA_URL, { cache: 'no-store' });
+    const response = await fetch(API_URL, { cache: 'no-store' });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
-    state.assets = data.assets.filter(asset => IMAGE_EXTENSIONS.test(asset.path));
+    if (data.truncated) console.warn('GitHub returned a truncated repository tree. Some assets may be missing.');
+    state.assets = data.tree
+      .filter(item => item.type === 'blob' && IMAGE_EXTENSIONS.test(item.path))
+      .map(item => ({ path: item.path }));
     renderFolders();
     renderAssets();
   } catch (error) {
     console.error(error);
     $('#status').style.display = 'block';
-    $('#status').textContent = 'Could not load assets.json. The site may still be deploying.';
+    $('#status').textContent = 'Could not load the GitHub repository tree.';
   }
 }
 
