@@ -76,3 +76,18 @@ select { height: 36px; padding: 0 9px; border: 1px solid var(--border); border-r
   .toolbar-right { margin-left: 0; justify-content: space-between; }
   .asset-grid { grid-template-columns: repeat(auto-fill, minmax(125px, 1fr)); gap: 9px; }
 }
+
+
+.tree-button { white-space: nowrap; }
+.tree-modal { position: fixed; inset: 0; z-index: 120; background: rgba(0,0,0,.84); display: grid; place-items: center; padding: 24px; }
+.tree-dialog { width: min(900px, 94vw); max-height: min(86vh, 900px); display: flex; flex-direction: column; gap: 12px; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; padding: 14px; box-shadow: 0 20px 80px rgba(0,0,0,.5); }
+.tree-modal[hidden] { display: none; }
+.tree-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.tree-header h2 { margin: 0; font-size: 15px; }
+.tree-output { width: 100%; min-height: 52vh; resize: vertical; border: 1px solid var(--border); border-radius: 7px; padding: 12px; background: #0a0c10; color: var(--text); font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; outline: none; }
+.tree-actions { display: flex; justify-content: flex-end; }
+@media (max-width: 760px) {
+  .tree-modal { padding: 12px; }
+  .tree-dialog { width: 100%; max-height: 92vh; }
+  .tree-output { min-height: 64vh; }
+}
