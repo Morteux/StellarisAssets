@@ -3,7 +3,7 @@ const BRANCH = 'main';
 const API_URL = `https://api.github.com/repos/${REPOSITORY}/git/trees/${BRANCH}?recursive=1`;
 const IMAGE_EXTENSIONS = /\.(png|jpe?g|gif|webp|avif|svg)$/i;
 
-const state = { assets: [], folder: '', query: '', sort: 'name' };
+const state = { assets: [], tree: [], folder: '', query: '', sort: 'name' };
 const $ = (s) => document.querySelector(s);
 
 function escapeHtml(value) {
@@ -150,6 +150,6 @@ $('#lightbox-close').addEventListener('click', closeLightbox);
 $('#lightbox').addEventListener('click', e => { if (e.target.id === 'lightbox') closeLightbox(); });
 document.addEventListener('keydown', e => {
   if (e.key === '/' && document.activeElement !== $('#search')) { e.preventDefault(); $('#search').focus(); }
-  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'Escape') {\n    if (!$('#tree-modal').hidden) closeTreeModal();\n    else closeLightbox();\n  }
 });
 init();
