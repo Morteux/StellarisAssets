@@ -3,7 +3,7 @@ const BRANCH = 'main';
 const API_URL = `https://api.github.com/repos/${REPOSITORY}/git/trees/${BRANCH}?recursive=1`;
 const IMAGE_EXTENSIONS = /\.(png|jpe?g|gif|webp|avif|svg)$/i;
 
-const state = { assets: [], folder: '', query: '', sort: 'name' };
+const state = { assets: [], tree: [], folder: '', query: '', sort: 'name' };
 const $ = (s) => document.querySelector(s);
 
 function escapeHtml(value) {
@@ -83,6 +83,76 @@ function closeLightbox() {
   document.body.style.overflow = '';
 }
 
+function buildFileTree(items) {
+  const root = { dirs: new Map(), files: [] };
+
+  for (const item of items) {
+    if (item.type !== 'tree' && item.type !== 'blob') continue;
+
+    const parts = item.path.split('/').filter(Boolean);
+    if (!parts.length) continue;
+
+    const name = parts.pop();
+    let node = root;
+
+    for (const part of parts) {
+      if (!node.dirs.has(part)) {
+        node.dirs.set(part, { dirs: new Map(), files: [] });
+      }
+      node = node.dirs.get(part);
+    }
+
+    if (item.type === 'tree') {
+      if (!node.dirs.has(name)) {
+        node.dirs.set(name, { dirs: new Map(), files: [] });
+      }
+    } else if (!node.files.includes(name)) {
+      node.files.push(name);
+    }
+  }
+
+  function renderNode(node, prefix) {
+    const entries = [
+      ...[...node.dirs.entries()]
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([name, child]) => ({ type: 'dir', name, child })),
+      ...node.files
+        .sort((a, b) => a.localeCompare(b))
+        .map(name => ({ type: 'file', name }))
+    ];
+
+    return entries.map((entry, index) => {
+      const isLast = index === entries.length - 1;
+      const branch = isLast ? '└── ' : '├── ';
+
+      if (entry.type === 'dir') {
+        const child = renderNode(
+          entry.child,
+          prefix + (isLast ? '    ' : '│   ')
+        );
+        return prefix + branch + entry.name + '/\n' + child;
+      }
+
+      return prefix + branch + entry.name;
+    }).join('\n');
+  }
+
+  const body = renderNode(root, '');
+  return body ? 'StellarisAssets/\n' + body : 'StellarisAssets/';
+}
+
+function openTreeModal() {
+  $('#file-tree-output').value = buildFileTree(state.tree);
+  $('#tree-modal').hidden = false;
+  document.body.style.overflow = 'hidden';
+  $('#file-tree-output').focus();
+}
+
+function closeTreeModal() {
+  $('#tree-modal').hidden = true;
+  document.body.style.overflow = '';
+}
+
 function renderAssets() {
   const assets = filteredAssets();
   $('#result-count').textContent = `${assets.length.toLocaleString()} asset${assets.length === 1 ? '' : 's'}`;
@@ -132,6 +202,8 @@ async function init() {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
     if (data.truncated) console.warn('GitHub returned a truncated repository tree. Some assets may be missing.');
+    state.tree = data.tree;
+    $('#tree-button').disabled = false;
     state.assets = data.tree
       .filter(item => item.type === 'blob' && IMAGE_EXTENSIONS.test(item.path))
       .map(item => ({ path: item.path }));
@@ -146,10 +218,17 @@ async function init() {
 
 $('#search').addEventListener('input', e => { state.query = e.target.value; renderAssets(); });
 $('#sort').addEventListener('change', e => { state.sort = e.target.value; renderAssets(); });
+$('#tree-button').addEventListener('click', openTreeModal);
+$('#tree-close').addEventListener('click', closeTreeModal);
+$('#tree-copy').addEventListener('click', () => copyText($('#file-tree-output').value, $('#tree-copy')));
+$('#tree-modal').addEventListener('click', e => { if (e.target.id === 'tree-modal') closeTreeModal(); });
 $('#lightbox-close').addEventListener('click', closeLightbox);
 $('#lightbox').addEventListener('click', e => { if (e.target.id === 'lightbox') closeLightbox(); });
 document.addEventListener('keydown', e => {
   if (e.key === '/' && document.activeElement !== $('#search')) { e.preventDefault(); $('#search').focus(); }
-  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'Escape') {
+    if (!$('#tree-modal').hidden) closeTreeModal();
+    else closeLightbox();
+  }
 });
 init();
