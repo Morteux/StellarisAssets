@@ -72,7 +72,7 @@ function saveTextAsFile(text, button) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = 'StellarisAssets-file-tree.txt';
+  link.download = 'StellarisAssetsFileTree.txt';
   document.body.appendChild(link);
   link.click();
   link.remove();
