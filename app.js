@@ -67,6 +67,22 @@ function copyText(text, button) {
   });
 }
 
+function saveTextAsFile(text, button) {
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'StellarisAssets-file-tree.txt';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+
+  const old = button.textContent;
+  button.textContent = 'Saved';
+  setTimeout(() => { button.textContent = old; }, 1000);
+}
+
 function openLightbox(asset) {
   const url = new URL(assetUrl(asset.path), document.baseURI).href;
   $('#lightbox-image').src = url;
@@ -221,6 +237,7 @@ $('#sort').addEventListener('change', e => { state.sort = e.target.value; render
 $('#tree-button').addEventListener('click', openTreeModal);
 $('#tree-close').addEventListener('click', closeTreeModal);
 $('#tree-copy').addEventListener('click', () => copyText($('#file-tree-output').value, $('#tree-copy')));
+$('#tree-save').addEventListener('click', () => saveTextAsFile($('#file-tree-output').value, $('#tree-save')));
 $('#tree-modal').addEventListener('click', e => { if (e.target.id === 'tree-modal') closeTreeModal(); });
 $('#lightbox-close').addEventListener('click', closeLightbox);
 $('#lightbox').addEventListener('click', e => { if (e.target.id === 'lightbox') closeLightbox(); });
